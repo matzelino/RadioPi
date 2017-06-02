@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Marions Radio Rekorder</title>
+
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+	<link rel="stylesheet" href="bootstrap/css/libnotify.css">
+	<link rel="stylesheet" href="bootstrap/css/datepicker.css">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap-timepicker.css">
+
+	<script src="station.js"></script>
+	<script src="program.js"></script>
+	<script src="jquery.js"></script>
+	<script src="bootstrap/js/bootstrap.js"></script>
+	<script src="bootstrap/js/humane.js"></script>
+	<script src="bootstrap/js/bootstrap-datepicker.js"></script>
+	<script src="bootstrap/js/bootstrap-timepicker.js"></script>
+	
+	<style>
+		body
+		{
+			padding-top: 50px;
+		}
+
+		.navbar-inner p {
+			padding-left: 20px;
+		}
+		
+		.modal.fade {
+			top: 20%;
+			-webkit-transition: opacity 0.3s linear;
+			-moz-transition: opacity 0.3s linear;
+			-o-transition: opacity 0.3s linear;
+			transition: opacity 0.3s linear;
+		}
+		
+		.modal.fade.in {
+			top: 20%;
+		}
+		
+		.radio-image {
+			float: right;
+			padding-right: 10px;
+			padding-top: 4px;
+		}	
+	</style>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<div class="radio-image"><img src="images/radio.png"></div>
+		<p><a class="brand" href="#">Marions Radio Rekorder</a></p>
+	</div>
+</div>
+
+<div class="navbar navbar-fixed-bottom">
+	<div class="container">
+		<p class="muted credit">Developed by <i class="icon-envelope"></i> <a href="mailto:matthias.simon@posteo.de">Matzeli</a></p>
+	</div>
+</div>
+
+<div class="container">
+	<div class="row">
+	
+		<!-- Program -->
+		<div class="span5">
+			<h2>Programm</h2>
+			<div id="Program">
+			    <table class="table table-condensed table-striped">
+					<thead>
+						<th><input class="ProgramSelector" type="checkbox" onclick="$('.ProgramCheckBox').attr('checked', $(this).attr('checked') == 'checked');"></th>
+						<th>Beschreibung</th>
+						<th>Zeit</th>
+						<th>Sender</th>
+						<th>Aktiv</th>
+					</thead>
+					<tbody />
+				</table>
+			</div>
+			<div class="btn-group">
+				<button class="btn btn-primary">Programm</button>
+				<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="javascript:addProgram();"><i class="icon-plus-sign"></i> Hinzufügen</a></li>
+				<li><a href="javascript:deleteProgram();" data-confirm="Sollen die markierten Programme wirklich gelöscht werden?"><i class="icon-trash"></i> Löschen</a></li>
+			</ul>
+			</div>			
+		</div><!-- Program -->
+
+		<!-- Stations -->
+		<div class="span3">
+			<h2>Sender</h2>
+			<div id="Station">
+			    <table class="table table-condensed table-striped">
+					<thead>
+						<th><input class="StationSelector" type="checkbox" onclick="$('.StationCheckBox').attr('checked', $(this).attr('checked') == 'checked');"></th>
+						<th>Name</th>
+					</thead>
+					<tbody />
+				</table>
+			</div>
+			<div class="btn-group">
+				<button class="btn btn-primary">Sender</button>
+				<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="javascript:addStation();"><i class="icon-plus-sign"></i> Hinzufügen</a></li>
+				<li><a href="javascript:deleteStation();" data-confirm="Sollen die markierten Sender wirklich gelöscht werden? Alle Programme, die davon aufnehmen, werden auch gelöscht!"><i class="icon-trash"></i> Löschen</a></li>
+			</ul>
+			</div>
+		</div><!-- Stations -->
+
+		<!-- System -->
+		<div class="span4">
+			<h2>System</h2>
+			<div id="System">
+			    <table class="table table-condensed table-striped">
+					<thead>
+						<th>Schlüssel</th>
+						<th>Wert</th>
+					</thead>
+					<tbody />
+				</table>
+			</div>
+		</div><!-- System -->
+		
+    </div><!-- .row -->
+</div><!-- .container -->
+
+
+<div id="ProgramModal" class="modal fade hide" tabindex="-1" role="dialog" aria-labelledby="ProgramModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Programm bearbeiten</h3>
+	</div>
+	<div class="modal-body" id="ProgramModalBody">
+		<form class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="inputProgramDescription">Beschreibung</label>
+				<div class="controls">
+					<input type="text" placeholder="Beschreibung" id="inputProgramDescription">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputWeekday">Wochentag</label>
+				<div class="controls">
+					<select id="inputWeekday">
+						<option value="-1">Kein spezieller Wochentag</option>
+						<option value="1">Montags</option>
+						<option value="2">Dienstags</option>
+						<option value="3">Mittwochs</option>
+						<option value="4">Donnerstags</option>
+						<option value="5">Freitags</option>
+						<option value="6">Samstags</option>
+						<option value="0">Sonntags</option>
+					</select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputDate">Datum</label>
+				<div class="controls">
+					<div id="inputDate" class="input-append date datepicker" data-date="" data-date-format="dd.mm.yyyy">
+						<input id="inputDateValue" type="text" value="" class="input-small">
+						<span class="add-on"><i class="icon-calendar"></i></span>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputTime">Uhrzeit</label>
+				<div class="controls">
+					<div class="input-append bootstrap-timepicker">
+						<input id="inputTime" type="text" class="input-small">
+						<span class="add-on"><i class="icon-time"></i></span>
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputDuration">Aufnahmedauer</label>
+				<div class="controls">
+					<input type="text" placeholder="Aufnahmedauer (Minuten)" id="inputDuration">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputProgramStationID">Sender</label>
+				<div class="controls">
+					<select id="inputProgramStationID">
+					</select>
+				</div>
+			</div>
+			<input type="hidden" id="inputProgramID" placeholder="ID">
+		</form>
+	</div>
+	<div class="modal-footer">
+		<div class="control-group">
+			<div class="controls">
+				<button type="submit" class="btn btn-primary">Speichern</button>
+				<button data-dismiss="modal" class="btn">Abbrechen</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="StationModal" class="modal fade hide" tabindex="-1" role="dialog" aria-labelledby="StationModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>Sender bearbeiten</h3>
+	</div>
+	<div class="modal-body">
+		<form class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="inputStationName">Name</label>
+				<div class="controls">
+					<input type="text" id="inputStationName" placeholder="Name">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputStreamURL">Stream URL</label>
+				<div class="controls">
+					<input type="text" id="inputStreamURL" placeholder="Stream URL">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputStationDescription">Beschreibung</label>
+				<div class="controls">
+					<textarea id="inputStationDescription" placeholder="Beschreibung"></textarea>
+				</div>
+			</div>
+			<input type="hidden" id="inputStationID" placeholder="ID">
+		</form>
+	</div>
+	<div class="modal-footer">
+		<div class="control-group">
+			<div class="controls">
+				<button type="submit" class="btn btn-primary">Speichern</button>
+				<button data-dismiss="modal" class="btn">Abbrechen</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+	$(document).ready(function() {
+		//Program Table
+		loadProgramTable();
+		
+		//Station Table
+		loadStationTable();
+		
+		//System Table
+		loadSystemTable();
+
+		$('a[data-confirm]').click(function(ev) {
+			var href = $(this).attr('href');
+			
+			if (!$('#dataConfirmModal').length)
+			{
+				$('body').append('<div id="dataConfirmModal" class="modal fade hide" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h3 id="dataConfirmLabel">Bitte bestätigen</h3></div><div style="padding:13px;float:left"><img src="images/exclamation.png"></div><div class="modal-body"></div><div class="modal-footer"><a class="btn btn-primary" id="dataConfirmOK">OK</a><button class="btn" data-dismiss="modal" aria-hidden="true">Abbrechen</button></div></div>');
+			}
+			
+			$('#dataConfirmModal').find('.modal-body').text($(this).attr('data-confirm'));
+			$('#dataConfirmOK').attr('href', href);
+			$('#dataConfirmModal').modal({
+				show:true
+			});
+			
+			return false;
+		});
+
+		$('#StationModal .btn-primary').click(function() {
+			var StationID = $('#inputStationID').val();
+			var StationName = $('#inputStationName').val();
+			var StreamURL = $('#inputStreamURL').val();
+			var StationDescription = $('#inputStationDescription').val();
+			
+			doSaveStation(StationID, StationName, StreamURL, StationDescription);
+		});
+		
+		$('#ProgramModal .btn-primary').click(function() {
+			var ProgramID = $('#inputProgramID').val();
+			var Description = $('#inputProgramDescription').val();
+			var WeekDay = $('#inputWeekday').val();
+			var ProgramDate = $('#inputDateValue').val();
+			var ProgramTime = $('#inputTime').val();
+			var Duration = $('#inputDuration').val();
+			var StationID = $('#inputProgramStationID').val();
+
+			doSaveProgram(ProgramID, Description, ProgramDate, ProgramTime, WeekDay, Duration, StationID);
+		});
+	});
+
+	function loadSystemTable()
+	{
+		$('#System tbody tr').remove();
+		
+		$.ajax({
+			url: "radio.webservices.php",
+			data: {
+				operation: "ReadSystemInformation"
+			},
+			type: "GET",
+			datatype: "json",
+			async: true,
+			success: function(data) {
+				var response = $.parseJSON(data);
+				var table = $('#System tbody');
+
+				if (response["data"] != false)
+				{
+					for (var property in response["data"])
+					{
+						$(table).append('<tr><td>' + property + '</td><td>' + response["data"][property] + '</td></tr>');
+					}
+				}
+				else
+				{
+					$(table).append('<tr><td colspan="3">Keine Informationen gefunden.</td></tr>');
+				}
+			}
+		});
+	}
+
+	Number.prototype.padZero = function(len)
+	{
+		return (Array(len).join("0") + String(this)).slice(-len);
+	}
+
+	String.prototype.padZero = function(len)
+	{
+		return (Array(len).join("0") + this).slice(-len);
+	}
+</script>
+
+</body>
+</html>
